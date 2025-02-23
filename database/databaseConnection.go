@@ -1,49 +1,41 @@
 package database
 
 import (
-	"context"
-	"database/sql"
 	"fmt"
 	"log"
 	"os"
-	"time"
 
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
+	"github/tiagoduarte/golang-api/models"
 )
 
-func DBInstance() *sql.DB {
+var DB *gorm.DB
+
+// Inicializa a conexão com o banco de dados
+func InitDB() {
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
 
-	PostgresURL := os.Getenv("POSTGRES_URL")
+	postgresURL := os.Getenv("POSTGRES_URL")
 
-	db, err := sql.Open("postgres", PostgresURL)
+	// Conectando ao banco de dados com GORM
+	db, err := gorm.Open(postgres.Open(postgresURL), &gorm.Config{})
 	if err != nil {
-		log.Fatal("Error opening database:", err)
-	}
-
-	// Testa a conexão com timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	err = db.PingContext(ctx)
-	if err != nil {
-		log.Fatal("Could not connect to PostgreSQL:", err)
+		log.Fatal("Failed to connect to the database:", err)
 	}
 
 	fmt.Println("Connected to PostgreSQL!")
 
-	return db
-}
+	// Executa a migração para criar a tabela
+	err = db.AutoMigrate(&models.User{})
+	if err != nil {
+		log.Fatal("Error running migrations:", err)
+	}
 
-// Variável global para a conexão
-var DB *sql.DB = DBInstance()
-
-// Função para abrir uma tabela (equivalente a OpenCollection)
-func OpenTable(db *sql.DB, tableName string) *sql.DB {
-	fmt.Println("Using table:", tableName)
-	return db
+	// Define a conexão global
+	DB = db
 }
