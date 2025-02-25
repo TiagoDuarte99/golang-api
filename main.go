@@ -1,28 +1,29 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	routes "github/tiagoduarte/golang-api/routes"
 	"github/tiagoduarte/golang-api/database"
+	routes "github/tiagoduarte/golang-api/routes"
 	"os"
+
+	"github.com/gin-gonic/gin"
 )
 
-func main() {
+func main(){
 	//buscar a porta em ENV
-	port := os.Getenv("PORT")
+	port:= os.Getenv("PORT")
 
-	if port == "" {
-		port = "8000"
+	if port==""{
+		port= "8000"
 	}
-
-	// Inicializar o banco de dados
+	
+// Inicializar o banco de dados
 	database.InitDB()
 
 	//Iniciar o router com o gin
 	router := gin.New()
 	router.Use(gin.Logger())
 
-	//importar as Rotas
+	//importar as Rotas 
 	routes.AuthRoutes(router)
 	routes.UserRoutes(router)
 
@@ -33,6 +34,6 @@ func main() {
 	router.GET("/api-2", func(ctx *gin.Context) {
 		ctx.JSON(200, gin.H{"success": "Access granted for api-2"})
 	})
-
+	
 	router.Run(":" + port)
 }

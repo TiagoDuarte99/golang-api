@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator"
+	"gorm.io/gorm"
 
 	"github/tiagoduarte/golang-api/database"
 
@@ -26,18 +27,30 @@ func HashPassword(password string) string {
 	return string(bytes)
 }
 
+func VerifyPassword(userPassword string, providedPassword string) (bool, string) {
+	err := bcrypt.CompareHashAndPassword([]byte(providedPassword), []byte(userPassword))
+	check := true
+	msg := ""
+
+	if err != nil {
+		msg = "email or password is incorrect"
+		check = false
+	}
+	return check, msg
+}
+
 func Signup(ctx *gin.Context) {
 	var user models.User
 
 	if err := ctx.BindJSON(&user); err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	validationErr := validate.Struct(user)
 
 	if validationErr != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": validationErr.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": validationErr.Error()})
 		return
 	}
 
@@ -50,16 +63,49 @@ func Signup(ctx *gin.Context) {
 	user.CreatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 
 	if err := database.DB.Create(&user).Error; err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "error to create user"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error to create user"})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "User registered successfully", "user": user})
+	ctx.JSON(http.StatusOK, gin.H{"message": "User registered successfully"})
 }
 
-/*
-func Login()
-*/
+func Login(ctx *gin.Context) {
+	var user models.User
+	var userFound models.User
+
+	if err := ctx.BindJSON(&user); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := database.DB.Where("email = ?", user.Email).First(&userFound).Error; err == gorm.ErrRecordNotFound {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "email or password is incorrect"})
+		return
+	}
+
+	passwordIsValid, msg := VerifyPassword(user.Password, userFound.Password)
+	if !passwordIsValid {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": msg})
+		return
+	}
+
+	//TOKEN TENHO DE TER O TOKEN
+
+	token, refreshToken, _ := helper.GenerateAllTokens(userFound.Name, userFound.Email,  userFound.UserType)
+
+	helper.UpdateAllTokens(token, refreshToken, userFound.ID)
+
+
+	err := database.DB.Where("id = ?", userFound.ID).First(&userFound).Error
+
+	if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+	}
+
+	ctx.JSON(http.StatusOK, userFound)
+}
 
 func GetUsers(ctx *gin.Context) {
 	var users []models.User
