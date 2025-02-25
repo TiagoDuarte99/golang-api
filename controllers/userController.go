@@ -5,6 +5,7 @@ import (
 	"github/tiagoduarte/golang-api/models"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -90,18 +91,15 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
-	//TOKEN TENHO DE TER O TOKEN
-
-	token, refreshToken, _ := helper.GenerateAllTokens(userFound.Name, userFound.Email,  userFound.UserType)
+	token, refreshToken, _ := helper.GenerateAllTokens(userFound.Name, userFound.Email, userFound.UserType, userFound.ID)
 
 	helper.UpdateAllTokens(token, refreshToken, userFound.ID)
-
 
 	err := database.DB.Where("id = ?", userFound.ID).First(&userFound).Error
 
 	if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
 	ctx.JSON(http.StatusOK, userFound)
@@ -109,17 +107,26 @@ func Login(ctx *gin.Context) {
 
 func GetUsers(ctx *gin.Context) {
 	var users []models.User
-	/* 	if err := helper.CheckUserType(ctx, "ADMIN"); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error":err.Error()})
-		return
-	} */
-
-	if err := database.DB.Find(&users).Error; err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+	if err := helper.CheckUserType(ctx, "ADMIN"); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	//Falta paginação
+	recordPerPage := 4
+
+	pageStr := ctx.DefaultQuery("page", "1")
+	page, err1 := strconv.Atoi(pageStr)
+	if err1 != nil || page < 1 {
+		page = 1
+	}
+
+	offset := (page - 1) * recordPerPage
+
+	if err := database.DB.Offset(offset).Limit(recordPerPage).Find(&users).Error; err != nil {
+    ctx.JSON(http.StatusNotFound, gin.H{"error": "Users not found"})
+    return
+}
+
 	ctx.JSON(http.StatusOK, users)
 }
 

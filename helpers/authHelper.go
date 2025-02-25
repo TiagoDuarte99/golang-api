@@ -2,6 +2,7 @@ package helper
 
 import (
 	"errors"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,8 +20,9 @@ func CheckUserType(ctx *gin.Context, userTypeRole string) (err error) {
 
 func MatchUserTypeToUserId(ctx *gin.Context, userId string) (err error) {
 	userType := ctx.GetString("user_type")
-	uid := ctx.GetString("id")
-
+	//Recebo o id como int e converto para string
+	uid := strconv.Itoa(ctx.GetInt("id"))
+	
 	err = nil
 
 	if userType == "USER" && uid != userId {

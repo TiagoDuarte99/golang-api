@@ -3,6 +3,7 @@ package helper
 import (
 	"github/tiagoduarte/golang-api/database"
 	"github/tiagoduarte/golang-api/models"
+	"log"
 	"os"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 )
 
 type SignedDetails struct {
+	ID       int    `json:"id"`
 	Name     string `json:"name"`
 	Email    string `json:"email"`
 	UserType string `json:"user_type"`
@@ -18,9 +20,11 @@ type SignedDetails struct {
 
 var SECRET_KEY string = os.Getenv("SECRET_KEY")
 
-func GenerateAllTokens(name, email, userType string) (string, string, error) {
+func GenerateAllTokens(name, email, userType string, id int) (string, string, error) {
 	// Criando o token principal (JWT)
+log.Println(id)
 	claims := &SignedDetails{
+		ID:       id,
 		Name:     name,
 		Email:    email,
 		UserType: userType,
@@ -75,7 +79,7 @@ func ValidateToken(signedToken string) (*SignedDetails, string) {
 	return claims, ""
 }
 
-func UpdateAllTokens(signedToken string, signedRefreshToken string,userID int) error {
+func UpdateAllTokens(signedToken string, signedRefreshToken string, userID int) error {
 	err := database.DB.Model(&models.User{}).
 		Where("id = ?", userID).
 		Updates(map[string]interface{}{
