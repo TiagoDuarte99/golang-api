@@ -2,6 +2,7 @@ package helper
 
 import (
 	"github/tiagoduarte/golang-api/database"
+	"github/tiagoduarte/golang-api/dto"
 	"github/tiagoduarte/golang-api/models"
 	"log"
 	"os"
@@ -10,20 +11,13 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
-type SignedDetails struct {
-	ID       int    `json:"id"`
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	UserType string `json:"user_type"`
-	jwt.StandardClaims
-}
-
 var SECRET_KEY string = os.Getenv("SECRET_KEY")
 
 func GenerateAllTokens(name, email, userType string, id int) (string, string, error) {
 	// Criando o token principal (JWT)
 log.Println(id)
-	claims := &SignedDetails{
+	
+	claims := &dto.SignupRequest{
 		ID:       id,
 		Name:     name,
 		Email:    email,
@@ -34,7 +28,7 @@ log.Println(id)
 	}
 
 	// Criando o refresh token (com duração maior)
-	refreshClaims := &SignedDetails{
+	refreshClaims := &dto.SignupRequest{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(7 * 24 * time.Hour).Unix(), // Expira em 7 dias
 		},
@@ -54,10 +48,10 @@ log.Println(id)
 	return token, refreshToken, nil
 }
 
-func ValidateToken(signedToken string) (*SignedDetails, string) {
+func ValidateToken(signedToken string) (*dto.SignupRequest, string) {
 	token, err := jwt.ParseWithClaims(
 		signedToken,
-		&SignedDetails{},
+		&dto.SignupRequest{},
 		func(token *jwt.Token) (interface{}, error) {
 			return []byte(SECRET_KEY), nil
 		},
@@ -67,7 +61,7 @@ func ValidateToken(signedToken string) (*SignedDetails, string) {
 		return nil, "Erro ao validar o token"
 	}
 
-	claims, ok := token.Claims.(*SignedDetails)
+	claims, ok := token.Claims.(*dto.SignupRequest)
 	if !ok {
 		return nil, "Token inválido"
 	}
