@@ -10,4 +10,5 @@ func UserRoutes(incomingRoutes *gin.Engine){
 	incomingRoutes.Use(middleware.AuthMiddleware())
 	incomingRoutes.GET("/users", controller.GetUsers) 
 	incomingRoutes.GET("/users/:id", controller.GetUser)
+	incomingRoutes.PATCH("/users/:id", controller.UpdateUser)
 }

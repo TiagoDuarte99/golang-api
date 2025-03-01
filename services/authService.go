@@ -46,7 +46,14 @@ func Login(email, password string) (models.User, string, string, error) {
 	}
 
 	token, refreshToken, _ := helper.GenerateAllTokens(user.Name, user.Email, user.UserType, user.ID)
-	helper.UpdateAllTokens(token, refreshToken, user.ID)
+
+	err = helper.UpdateAllTokens(token, refreshToken, user.ID)
+	if err != nil {
+		return user, "", "", err
+	}
+
+	user.Token = &token
+	user.RefreshToken = &refreshToken
 
 	return user, token, refreshToken, nil
 }

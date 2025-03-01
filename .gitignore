@@ -1,1 +1,7 @@
 .env
+/tmp
+.air.config
+.air.toml
+.dockerignore
+docker-compose.yml
+Dockerfile
