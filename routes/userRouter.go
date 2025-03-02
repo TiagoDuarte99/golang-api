@@ -11,4 +11,6 @@ func UserRoutes(incomingRoutes *gin.Engine){
 	incomingRoutes.GET("/users", controller.GetUsers) 
 	incomingRoutes.GET("/users/:id", controller.GetUser)
 	incomingRoutes.PATCH("/users/:id", controller.UpdateUser)
+	incomingRoutes.DELETE("/users/:id", controller.DeleteUser)
+
 }

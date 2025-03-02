@@ -5,7 +5,6 @@ import (
 	"github/tiagoduarte/golang-api/dto"
 	helper "github/tiagoduarte/golang-api/helpers"
 	repositories "github/tiagoduarte/golang-api/repositories"
-	"log"
 
 	"github/tiagoduarte/golang-api/models"
 
@@ -38,7 +37,6 @@ func GetUsersWithPagination(ctx *gin.Context) ([]models.User, error) {
 
 func GetUserByIDWithAuthorization(ctx *gin.Context, userId string) (*models.User, error) {
 	if err := helper.MatchUserTypeToUserId(ctx, userId); err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
@@ -56,12 +54,12 @@ func GetUserByIDWithAuthorization(ctx *gin.Context, userId string) (*models.User
 }
 
 func UpdateUser(ctx *gin.Context, userId string, userUpdate dto.UpdateUserRequest) (*models.User, error) {
-	userIDInt, err := strconv.Atoi(userId)
-	if err != nil {
-		return nil, err
-	}
+	/* 	userIDInt, err := strconv.Atoi(userId)
+	   	if err != nil {
+	   		return nil, err
+	   	} */
 
-	user, err := repositories.GetUserByID(userIDInt)
+	user, err := GetUserByIDWithAuthorization(ctx, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +74,7 @@ func UpdateUser(ctx *gin.Context, userId string, userUpdate dto.UpdateUserReques
 		if userUpdate.Password != userUpdate.ConfirmPassword {
 			passwordIsValid, err := helper.VerifyPassword(userUpdate.Password, userUpdate.ConfirmPassword)
 			if !passwordIsValid {
-				return &user, errors.New(err)
+				return user, errors.New(err)
 			}
 		}
 
@@ -84,10 +82,25 @@ func UpdateUser(ctx *gin.Context, userId string, userUpdate dto.UpdateUserReques
 
 	}
 
-	updatedUser, err := repositories.UpdateUser(&user)
+	updatedUser, err := repositories.UpdateUser(user)
 	if err != nil {
 		return nil, err
 	}
 
 	return updatedUser, nil
+}
+
+func DeleteUser(ctx *gin.Context, userId string) error {
+
+	user, err := GetUserByIDWithAuthorization(ctx, userId)
+	if err != nil {
+		return err
+	}
+
+	err = repositories.DeleteUser(user)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

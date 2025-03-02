@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github/tiagoduarte/golang-api/database"
 	"github/tiagoduarte/golang-api/models"
+	"log"
 )
 
 func GetUsers(offset int, recordPerPage int) ([]models.User, error) {
@@ -31,4 +32,13 @@ func UpdateUser(user *models.User) (*models.User, error) {
 	}
 
 	return user, nil
+}
+
+func DeleteUser(user *models.User) error {
+log.Println("user repositorie:", user)
+	if err := database.DB.Delete(user).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
