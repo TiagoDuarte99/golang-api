@@ -5,10 +5,10 @@ import (
 	"log"
 	"os"
 
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 	"github.com/joho/godotenv"
 	"github/tiagoduarte/golang-api/models"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 var DB *gorm.DB
@@ -31,7 +31,14 @@ func InitDB() {
 	fmt.Println("Connected to PostgreSQL!")
 
 	// Executa a migração para criar a tabela
-	err = db.AutoMigrate(&models.User{})
+	err = db.AutoMigrate(
+		&models.User{},
+		&models.Team{},
+		&models.Player{},
+		&models.Match{},
+		&models.MatchScorer{},
+		&models.MatchAssistant{},
+	)
 	if err != nil {
 		log.Fatal("Error running migrations:", err)
 	}

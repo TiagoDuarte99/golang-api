@@ -5,3 +5,4 @@
 .dockerignore
 docker-compose.yml
 Dockerfile
+project.txt

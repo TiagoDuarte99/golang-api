@@ -26,6 +26,8 @@ func main(){
 	//importar as Rotas 
 	routes.AuthRoutes(router)
 	routes.UserRoutes(router)
+	routes.TeamsRoutes(router)
+
 
 	router.GET("/api-1", func(ctx *gin.Context) {
 		ctx.JSON(200, gin.H{"success": "Access granted for api-1"})

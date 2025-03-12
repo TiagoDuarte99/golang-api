@@ -6,8 +6,9 @@ import (
 	"github/tiagoduarte/golang-api/models"
 )
 
-func Signup(user *models.User) (error) {
-	if err := database.DB.Create(&user).Error; err != nil {
+func Signup(user *models.User) error {
+	if err := database.DB.
+		Create(&user).Error; err != nil {
 		return errors.New("error creating user")
 	}
 	return nil
@@ -15,7 +16,9 @@ func Signup(user *models.User) (error) {
 
 func GetUserByEmailForLogin(userEmail string) (models.User, error) {
 	var existingUser models.User
-	if err := database.DB.Where("email = ?", userEmail).First(&existingUser).Error; err != nil {
+	if err := database.DB.
+		Where("email = ?", userEmail).
+		First(&existingUser).Error; err != nil {
 
 		return existingUser, errors.New("user not found")
 	}
@@ -26,7 +29,9 @@ func GetUserByEmailForLogin(userEmail string) (models.User, error) {
 func CheckIfEmailExists(userEmail string) error {
 	var existingUser models.User
 
-	if err := database.DB.Where("email = ?", userEmail).First(&existingUser).Error; err == nil {
+	if err := database.DB.
+		Where("email = ?", userEmail).
+		First(&existingUser).Error; err == nil {
 
 		return errors.New("email already registered")
 	}
