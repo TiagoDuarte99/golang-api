@@ -15,9 +15,9 @@ var SECRET_KEY string = os.Getenv("SECRET_KEY")
 
 func GenerateAllTokens(name, email, userType string, id int) (string, string, error) {
 	// Criando o token principal (JWT)
-log.Println(id)
-	
-	claims := &dto.SignupRequest{
+	log.Println(id)
+
+	claims := &dto.TokenClaims{
 		ID:       id,
 		Name:     name,
 		Email:    email,
@@ -28,7 +28,7 @@ log.Println(id)
 	}
 
 	// Criando o refresh token (com duração maior)
-	refreshClaims := &dto.SignupRequest{
+	refreshClaims := &dto.TokenClaims{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(7 * 24 * time.Hour).Unix(), // Expira em 7 dias
 		},
@@ -48,10 +48,10 @@ log.Println(id)
 	return token, refreshToken, nil
 }
 
-func ValidateToken(signedToken string) (*dto.SignupRequest, string) {
+func ValidateToken(signedToken string) (*dto.TokenClaims, string) {
 	token, err := jwt.ParseWithClaims(
 		signedToken,
-		&dto.SignupRequest{},
+		&dto.TokenClaims{},
 		func(token *jwt.Token) (interface{}, error) {
 			return []byte(SECRET_KEY), nil
 		},
@@ -61,7 +61,7 @@ func ValidateToken(signedToken string) (*dto.SignupRequest, string) {
 		return nil, "Erro ao validar o token"
 	}
 
-	claims, ok := token.Claims.(*dto.SignupRequest)
+	claims, ok := token.Claims.(*dto.TokenClaims)
 	if !ok {
 		return nil, "Token inválido"
 	}

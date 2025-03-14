@@ -2,10 +2,9 @@ package controllers
 
 import (
 	"github/tiagoduarte/golang-api/dto"
-/* 	"github/tiagoduarte/golang-api/models" */
+	helper "github/tiagoduarte/golang-api/helpers"
 	"github/tiagoduarte/golang-api/services"
 	"net/http"
-helper "github/tiagoduarte/golang-api/helpers"
 
 	"github.com/gin-gonic/gin"
 
@@ -16,9 +15,8 @@ func GetUsers(ctx *gin.Context) {
 	// Verificação de autorização já vai para o serviço
 	users, err := services.GetUsersWithPagination(ctx)
 	if err != nil {
-		if helper.HandleAuthorizationError(ctx, err) {
-			return
-		}
+		helper.HandleError(ctx, err)
+		return
 	}
 
 	ctx.JSON(http.StatusOK, users)
@@ -29,9 +27,8 @@ func GetUser(ctx *gin.Context) {
 
 	user, err := services.GetUserByIDWithAuthorization(ctx, userId)
 	if err != nil {
-		if helper.HandleAuthorizationError(ctx, err) {
-			return
-		}
+		helper.HandleError(ctx, err)
+		return
 	}
 
 	ctx.JSON(http.StatusOK, user)
@@ -49,10 +46,7 @@ func UpdateUser(ctx *gin.Context) {
 
 	updatedUser, err := services.UpdateUser(ctx, userId, userUpdate)
 	if err != nil {
-		if helper.HandleAuthorizationError(ctx, err) {
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user: " + err.Error()})
+		helper.HandleError(ctx, err)
 		return
 	}
 
@@ -64,10 +58,7 @@ func DeleteUser(ctx *gin.Context) {
 
 	err := services.DeleteUser(ctx, userId)
 	if err != nil {
-		if helper.HandleAuthorizationError(ctx, err) {
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user: " + err.Error()})
+		helper.HandleError(ctx, err)
 		return
 	}
 

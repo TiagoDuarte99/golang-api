@@ -1,9 +1,9 @@
 package repositories
 
 import (
-	"errors"
 	"github/tiagoduarte/golang-api/database"
 	"github/tiagoduarte/golang-api/dto"
+	helper "github/tiagoduarte/golang-api/helpers"
 	"github/tiagoduarte/golang-api/models"
 )
 
@@ -16,7 +16,12 @@ func GetTeams(offset int, recordPerPage int) ([]dto.TeamDTO, error) {
 		Order("id ASC").
 		Preload("Coach").
 		Find(&teams).Error; err != nil {
-		return nil, errors.New("notfound")
+		return nil, &helper.CustomError{
+			Type:    helper.ErrNotFound,
+			Message: helper.ErrorResponse{
+        Message: "Teams not found for the requested parameters.",
+    },
+		}
 	}
 
 	// Converte os dados das equipas para DTO, removendo informações desnecessárias

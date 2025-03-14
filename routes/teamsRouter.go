@@ -12,8 +12,8 @@ func TeamsRoutes(incomingRoutes *gin.Engine) {
 	// Rotas públicas (sem middleware)
 	log.Println(incomingRoutes)
 	incomingRoutes.GET("/teams", controller.GetTeams)
-/* 	incomingRoutes.GET("/teams/:id", controller.GetTeam)
-
+	incomingRoutes.GET("/teams/:id", controller.GetTeam)
+/* 
 	// Grupo de rotas protegidas pelo middleware
 	protectedRoutes := incomingRoutes.Group("/teams")
 	protectedRoutes.Use(middleware.AuthMiddleware())

@@ -1,8 +1,8 @@
 package repositories
 
 import (
-	"errors"
 	"github/tiagoduarte/golang-api/database"
+	helper "github/tiagoduarte/golang-api/helpers"
 	"github/tiagoduarte/golang-api/models"
 	"log"
 )
@@ -14,7 +14,12 @@ func GetUsers(offset int, recordPerPage int) ([]models.User, error) {
 		Limit(recordPerPage).
 		Order("id ASC").
 		Find(&users).Error; err != nil {
-		return nil, errors.New("notfound")
+		return nil, &helper.CustomError{
+			Type:    helper.ErrNotFound,
+			Message: helper.ErrorResponse{
+        Message: "Teams not found for the requested parameters.",
+    },
+		}
 	}
 
 	return users, nil
@@ -24,7 +29,12 @@ func GetUserByID(userID int) (models.User, error) {
 	var user models.User
 	if err := database.DB.
 		First(&user, "id = ?", userID).Error; err != nil {
-		return user, errors.New("notfound")
+		return user, &helper.CustomError{
+			Type:    helper.ErrNotFound,
+			Message: helper.ErrorResponse{
+        Message: "Teams not found for the requested parameters.",
+    },
+		}
 	}
 
 	return user, nil

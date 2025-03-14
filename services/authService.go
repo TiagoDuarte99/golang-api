@@ -2,27 +2,42 @@ package services
 
 import (
 	"errors"
+	"github/tiagoduarte/golang-api/dto"
 	helper "github/tiagoduarte/golang-api/helpers"
 	repositories "github/tiagoduarte/golang-api/repositories"
 
 	"github/tiagoduarte/golang-api/models"
 
 	"time"
-
 )
 
-func Signup(user *models.User) error {
-	if err := helper.ValidateUser(user); err != nil {
+func Signup(req *dto.SignupRequest) error {
+	if err := helper.ValidateUser(req); err != nil {
 		return err
 	}
+ 
+ if req.Password != req.ConfirmPassword {
+	return &helper.CustomError{
+			Type:    helper.ErrBadRequest,
+			Message: helper.ErrorResponse{Message: "Passwords do not match"},
+	}
+}
 
-	err := repositories.CheckIfEmailExists(user.Email)
+	err := repositories.CheckIfEmailExists(req.Email)
 	if err != nil {
 		return err
 	}
 
-	user.Password = helper.HashPassword(user.Password)
-	user.CreatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	hashedPassword := helper.HashPassword(req.Password)
+	createdAt, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+
+	user := &models.User{
+		Name:      req.Name,
+		Email:     req.Email,
+		Password:  hashedPassword,
+		UserType:  req.UserType,
+		CreatedAt: createdAt,
+	}
 
 	err = repositories.Signup(user)
 	if err != nil {

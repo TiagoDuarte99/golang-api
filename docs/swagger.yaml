@@ -1,0 +1,75 @@
+definitions:
+  dto.SignupRequest:
+    properties:
+      confirm_password:
+        example: SenhaForte123!
+        minLength: 6
+        type: string
+      email:
+        example: tiago@example.com
+        type: string
+      name:
+        example: Tiago Duarte
+        maxLength: 100
+        minLength: 2
+        type: string
+      password:
+        example: SenhaForte123!
+        minLength: 6
+        type: string
+      user_type:
+        example: USER
+        type: string
+    required:
+    - confirm_password
+    - email
+    - name
+    - password
+    - user_type
+    type: object
+  helper.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /users:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint allows you to create a new user with the provided
+        data.
+      parameters:
+      - description: User data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SignupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SignupRequest'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+        "409":
+          description: Conflit
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+      summary: Create a new user
+swagger: "2.0"

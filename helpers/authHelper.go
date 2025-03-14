@@ -1,8 +1,8 @@
 package helper
 
 import (
-	"errors"
-	"github/tiagoduarte/golang-api/models"
+	
+	"github/tiagoduarte/golang-api/dto"
 	"strconv"
 	"strings"
 
@@ -12,15 +12,17 @@ import (
 
 var validate = validator.New()
 
-func CheckUserType(ctx *gin.Context, userTypeRole string) (err error) {
+func CheckUserType(ctx *gin.Context, userTypeRole string) error {
 	userType := ctx.GetString("user_type")
-	err = nil
-
 	if userType != userTypeRole {
-		err = errors.New("unauthorized")
-		return err
+		return &CustomError{
+			Type:    ErrUnauthorized,
+			Message: ErrorResponse{
+        Message: "User type " + userType + " is not authorized. Required role: " + userTypeRole,
+    },
+		}
 	}
-	return err
+	return nil
 }
 
 func MatchUserTypeToUserId(ctx *gin.Context, userId string) (err error) {
@@ -31,21 +33,29 @@ func MatchUserTypeToUserId(ctx *gin.Context, userId string) (err error) {
 	err = nil
 
 	if userType == "USER" && uid != userId {
-		err = errors.New("unauthorized")
-		return err
+		return &CustomError{
+			Type:    ErrUnauthorized,
+			Message: ErrorResponse{
+				"User with id " + uid + " is not authorized to access this resource. Required userId: " + userId,
+			},
+		}
 	}
 
-	err = CheckUserType(ctx, userType)
-	return err
+
+	return CheckUserType(ctx, userType)
 }
 
-func ValidateUser(user *models.User) error {
+func ValidateUser(user *dto.SignupRequest) error {
+
 	if validationErr := validate.Struct(user); validationErr != nil {
-		var errMessages []string
-		for _, err := range validationErr.(validator.ValidationErrors) {
-			errMessages = append(errMessages, err.Field()+" is invalid: "+err.Tag())
-		}
-		return errors.New(strings.Join(errMessages, ", "))
+			var errMessages []string
+			for _, err := range validationErr.(validator.ValidationErrors) {
+					errMessages = append(errMessages, err.Field()+" is invalid: "+err.Tag())
+			}
+			return &CustomError{
+				Type:    ErrBadRequest,
+				Message: ErrorResponse{Message: strings.Join(errMessages, ", ")},
+			}
 	}
 
 	return nil
