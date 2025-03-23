@@ -4,7 +4,7 @@ import (
 	"github/tiagoduarte/golang-api/dto"
 	helper "github/tiagoduarte/golang-api/helpers"
 	"github/tiagoduarte/golang-api/services"
-	"log"
+
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -16,8 +16,8 @@ import (
 // @Description This endpoint allows you to create a new user with the provided data.
 // @Accept json
 // @Produce json
-// @Param user body dto.SignupRequest true "User data" // Certifique-se de usar o caminho correto para o tipo User
-// @Success 200 {object} dto.SignupRequest
+// @Param user body dto.SignupRequest true "User data"
+// @Success 200 {object} dto.SuccessMessage "User registered successfully"
 // @Failure 400 {object} helper.ErrorResponse "Bad Request"
 // @Failure 401 {object} helper.ErrorResponse "Unauthorized"
 // @Failure 404 {object} helper.ErrorResponse "Not Found"
@@ -27,37 +27,57 @@ func Signup(ctx *gin.Context) {
 	var user dto.SignupRequest
 
 	if err := ctx.BindJSON(&user); err != nil {
-		helper.HandleError(ctx, err)
+		customErr := &helper.CustomError{
+			Type:    helper.ErrBadRequest,
+			Message: helper.ErrorResponse{Message: "Invalid request data: " + err.Error()},
+		}
+		helper.HandleError(ctx, customErr)
 		return
 	}
 
 	err := services.Signup(&user)
-	log.Println(err)
+
 	if err != nil {
 		helper.HandleError(ctx, err)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "User registered successfully"})
+	ctx.JSON(http.StatusOK, dto.SuccessMessage{Message: "User registered successfully"})
 }
 
+// @Summary User Login
+// @Description This endpoint allows an existing user to login by providing their email and password.
+// @Accept json
+// @Produce json
+// @Param loginData body dto.LoginRequest true "Login credentials"
+// @Success 200 {object} dto.LoginResponse
+// @Failure 400 {object} helper.ErrorResponse "Bad Request"
+// @Failure 401 {object} helper.ErrorResponse "Unauthorized"
+// @Failure 404 {object} helper.ErrorResponse "Not Found"
+// @Failure 500 {object} helper.ErrorResponse "Internal Server Error"
+// @Router /login [post]
 func Login(ctx *gin.Context) {
 	loginData := dto.LoginRequest{}
 
 	if err := ctx.BindJSON(&loginData); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		customErr := &helper.CustomError{
+			Type:    helper.ErrBadRequest,
+			Message: helper.ErrorResponse{Message: "Invalid request data: " + err.Error()},
+		}
+		helper.HandleError(ctx, customErr)
 		return
 	}
 
 	user, token, refreshToken, err := services.Login(loginData.Email, loginData.Password)
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		helper.HandleError(ctx, err)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"user":          user,
-		"token":         token,
-		"refresh_token": refreshToken,
-	})
+	response := dto.LoginResponse{
+		User:         user,         // Supondo que você tenha uma variável user com os dados do usuário
+		Token:        token,        // Token gerado
+		RefreshToken: refreshToken, // Token de refresh gerado
+	}
+	ctx.JSON(http.StatusOK, response)
 }

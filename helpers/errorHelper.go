@@ -32,6 +32,7 @@ func HandleError(ctx *gin.Context, err error) {
 	if err == nil {
 		return
 	}
+	/* log.Println(err) */
 
 	if customErr, ok := err.(*CustomError); ok {
 		switch customErr.Type {
@@ -47,10 +48,9 @@ func HandleError(ctx *gin.Context, err error) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		}
 	} else {
-		// Erro desconhecido
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "An unexpected error occurred"})
 	}
-	// Aborta a execução do handler após o erro ser tratado
+
 	ctx.Abort()
 }
 

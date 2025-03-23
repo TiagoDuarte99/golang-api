@@ -1,7 +1,6 @@
 package services
 
 import (
-	"errors"
 	"github/tiagoduarte/golang-api/dto"
 	helper "github/tiagoduarte/golang-api/helpers"
 	repositories "github/tiagoduarte/golang-api/repositories"
@@ -74,7 +73,7 @@ func UpdateUser(ctx *gin.Context, userId string, userUpdate dto.UpdateUserReques
 		if userUpdate.Password != userUpdate.ConfirmPassword {
 			passwordIsValid, err := helper.VerifyPassword(userUpdate.Password, userUpdate.ConfirmPassword)
 			if !passwordIsValid {
-				return user, errors.New(err)
+				return user, err
 			}
 		}
 

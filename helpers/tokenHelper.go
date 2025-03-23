@@ -4,7 +4,6 @@ import (
 	"github/tiagoduarte/golang-api/database"
 	"github/tiagoduarte/golang-api/dto"
 	"github/tiagoduarte/golang-api/models"
-	"log"
 	"os"
 	"time"
 
@@ -14,8 +13,6 @@ import (
 var SECRET_KEY string = os.Getenv("SECRET_KEY")
 
 func GenerateAllTokens(name, email, userType string, id int) (string, string, error) {
-	// Criando o token principal (JWT)
-	log.Println(id)
 
 	claims := &dto.TokenClaims{
 		ID:       id,

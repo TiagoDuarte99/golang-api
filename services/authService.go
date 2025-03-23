@@ -1,7 +1,6 @@
 package services
 
 import (
-	"errors"
 	"github/tiagoduarte/golang-api/dto"
 	helper "github/tiagoduarte/golang-api/helpers"
 	repositories "github/tiagoduarte/golang-api/repositories"
@@ -55,9 +54,9 @@ func Login(email, password string) (models.User, string, string, error) {
 		return user, "", "", err
 	}
 
-	passwordIsValid, msg := helper.VerifyPassword(password, user.Password)
+	passwordIsValid, err := helper.VerifyPassword(password, user.Password)
 	if !passwordIsValid {
-		return user, "", "", errors.New(msg)
+		return user, "", "", err
 	}
 
 	token, refreshToken, _ := helper.GenerateAllTokens(user.Name, user.Email, user.UserType, user.ID)

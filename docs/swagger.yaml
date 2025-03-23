@@ -1,4 +1,26 @@
 definitions:
+  dto.LoginRequest:
+    properties:
+      email:
+        example: tiago@example.com
+        type: string
+      password:
+        example: SenhaForte123!
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  dto.LoginResponse:
+    properties:
+      refresh_token:
+        type: string
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/models.User'
+    type: object
   dto.SignupRequest:
     properties:
       confirm_password:
@@ -27,14 +49,83 @@ definitions:
     - password
     - user_type
     type: object
+  dto.SuccessMessage:
+    properties:
+      message:
+        type: string
+    type: object
   helper.ErrorResponse:
     properties:
       message:
         type: string
     type: object
+  models.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        maxLength: 100
+        minLength: 2
+        type: string
+      password:
+        minLength: 6
+        type: string
+      refresh_token:
+        type: string
+      token:
+        type: string
+      user_type:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    - user_type
+    type: object
 info:
   contact: {}
 paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint allows an existing user to login by providing their
+        email and password.
+      parameters:
+      - description: Login credentials
+        in: body
+        name: loginData
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+      summary: User Login
   /users:
     post:
       consumes:
@@ -52,9 +143,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: User registered successfully
           schema:
-            $ref: '#/definitions/dto.SignupRequest'
+            $ref: '#/definitions/dto.SuccessMessage'
         "400":
           description: Bad Request
           schema:

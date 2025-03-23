@@ -13,14 +13,13 @@ func HashPassword(password string) string {
 	return string(bytes)
 }
 
-func VerifyPassword(userPassword string, providedPassword string) (bool, string) {
+func VerifyPassword(userPassword string, providedPassword string) (bool, error) {
 	err := bcrypt.CompareHashAndPassword([]byte(providedPassword), []byte(userPassword))
-	check := true
-	msg := ""
-
 	if err != nil {
-		msg = "email or password is incorrect"
-		check = false
+		return false, &CustomError{
+			Type:    ErrBadRequest,
+			Message: ErrorResponse{Message: "Email or password is incorrect"} ,
+		}
 	}
-	return check, msg
+	return true, nil
 }
