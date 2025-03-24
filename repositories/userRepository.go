@@ -15,10 +15,10 @@ func GetUsers(offset int, recordPerPage int) ([]models.User, error) {
 		Order("id ASC").
 		Find(&users).Error; err != nil {
 		return nil, &helper.CustomError{
-			Type:    helper.ErrNotFound,
+			Type: helper.ErrNotFound,
 			Message: helper.ErrorResponse{
-        Message: "Teams not found for the requested parameters.",
-    },
+				Message: "Users not found for the requested parameters.",
+			},
 		}
 	}
 
@@ -30,10 +30,10 @@ func GetUserByID(userID int) (models.User, error) {
 	if err := database.DB.
 		First(&user, "id = ?", userID).Error; err != nil {
 		return user, &helper.CustomError{
-			Type:    helper.ErrNotFound,
+			Type: helper.ErrNotFound,
 			Message: helper.ErrorResponse{
-        Message: "Teams not found for the requested parameters.",
-    },
+				Message: "User not found for the requested parameters.",
+			},
 		}
 	}
 
@@ -41,9 +41,8 @@ func GetUserByID(userID int) (models.User, error) {
 }
 
 func UpdateUser(user *models.User) (*models.User, error) {
-
-	if err := database.DB.
-		Save(user).Error; err != nil {
+	if err := database.DB.Model(&models.User{}).Where("id = ?", user.ID).
+		Select("name", "email", "password").Updates(user).Error; err != nil {
 		return nil, err
 	}
 

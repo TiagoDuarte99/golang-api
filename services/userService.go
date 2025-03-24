@@ -23,7 +23,7 @@ func GetUsersWithPagination(ctx *gin.Context) ([]models.User, error) {
 		page = 1
 	}
 
-	const recordPerPage = 4
+	const recordPerPage = 10
 
 	offset := (page - 1) * recordPerPage
 	users, err := repositories.GetUsers(offset, recordPerPage)
@@ -67,8 +67,13 @@ func UpdateUser(ctx *gin.Context, userId string, userUpdate dto.UpdateUserReques
 		user.Name = userUpdate.Name
 	}
 	if userUpdate.Email != "" {
+		err := repositories.CheckIfEmailExists(userUpdate.Email)
+		if err != nil {
+			return nil, err
+		}
 		user.Email = userUpdate.Email
 	}
+
 	if userUpdate.Password != "" {
 		if userUpdate.Password != userUpdate.ConfirmPassword {
 			passwordIsValid, err := helper.VerifyPassword(userUpdate.Password, userUpdate.ConfirmPassword)
