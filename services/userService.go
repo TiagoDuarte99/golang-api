@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetUsersWithPagination(ctx *gin.Context) ([]models.User, error) {
+func GetUsersWithPagination(ctx *gin.Context) ([]dto.UserResponse, error) {
 	if err := helper.CheckUserType(ctx, "ADMIN"); err != nil {
 		return nil, err
 	}
@@ -34,7 +34,7 @@ func GetUsersWithPagination(ctx *gin.Context) ([]models.User, error) {
 	return users, nil
 }
 
-func GetUserByIDWithAuthorization(ctx *gin.Context, userId string) (*models.User, error) {
+func GetUserByIDWithAuthorization(ctx *gin.Context, userId string) (*dto.UserResponse, error) {
 	if err := helper.MatchUserTypeToUserId(ctx, userId); err != nil {
 		return nil, err
 	}
@@ -49,16 +49,35 @@ func GetUserByIDWithAuthorization(ctx *gin.Context, userId string) (*models.User
 		return nil, err
 	}
 
-	return &user, nil
+	return user, nil
 }
 
-func UpdateUser(ctx *gin.Context, userId string, userUpdate dto.UpdateUserRequest) (*models.User, error) {
+func GetUserByIDWithAuthorizationForUpdate(ctx *gin.Context, userId string) (*models.User, error) {
+	if err := helper.MatchUserTypeToUserId(ctx, userId); err != nil {
+		return nil, err
+	}
+
+	userIDInt, err := strconv.Atoi(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := repositories.GetUserCompleteByID(userIDInt)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+
+func UpdateUser(ctx *gin.Context, userId string, userUpdate dto.UpdateUserRequest) (*dto.UserResponse, error) {
 	/* 	userIDInt, err := strconv.Atoi(userId)
 	   	if err != nil {
 	   		return nil, err
 	   	} */
 
-	user, err := GetUserByIDWithAuthorization(ctx, userId)
+	user, err := GetUserByIDWithAuthorizationForUpdate(ctx, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +97,7 @@ func UpdateUser(ctx *gin.Context, userId string, userUpdate dto.UpdateUserReques
 		if userUpdate.Password != userUpdate.ConfirmPassword {
 			passwordIsValid, err := helper.VerifyPassword(userUpdate.Password, userUpdate.ConfirmPassword)
 			if !passwordIsValid {
-				return user, err
+				return nil, err
 			}
 		}
 

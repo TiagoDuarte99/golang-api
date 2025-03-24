@@ -17,7 +17,7 @@ import (
 // @Produce json
 // @Param page query int false "Page number" default(1)
 // @Param limit query int false "Number of users per page" default(10)
-// @Success 200 {array} models.User "List of users"
+// @Success 200 {array} dto.UserResponse "List of users"
 // @Failure 400 {object} helper.ErrorResponse "Bad Request"
 // @Failure 500 {object} helper.ErrorResponse "Internal Server Error"
 // @Router /users [get]
@@ -37,7 +37,7 @@ func GetUsers(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "User ID"
-// @Success 200 {object} models.User "User data"
+// @Success 200 {object} dto.UserResponse "User data"
 // @Failure 401 {object} helper.ErrorResponse "ErrUnauthorized"
 // @Failure 404 {object} helper.ErrorResponse "ErrNotFound"
 // @Failure 500 {object} helper.ErrorResponse "Internal Server Error"
@@ -60,7 +60,7 @@ func GetUser(ctx *gin.Context) {
 // @Produce json
 // @Param id path string true "User ID"
 // @Param user body dto.UpdateUserRequest true "User update data"
-// @Success 200 {object} models.User "Updated user data"
+// @Success 200 {object} dto.UserResponse "Updated user data"
 // @Failure 400 {object} helper.ErrorResponse "Bad Request"
 // @Failure 401 {object} helper.ErrorResponse "Unauthorized"
 // @Failure 403 {object} helper.ErrorResponse "Forbidden"
@@ -95,7 +95,7 @@ func UpdateUser(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "User ID"
-// @Success 200 {object} map[string]string "User deleted successfully"
+// @Success 200 {object} dto.SuccessMessage "User deleted successfully"
 // @Failure 400 {object} helper.ErrorResponse "Bad Request"
 // @Failure 401 {object} helper.ErrorResponse "Unauthorized"
 // @Failure 403 {object} helper.ErrorResponse "Forbidden"
@@ -111,5 +111,5 @@ func DeleteUser(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
+	ctx.JSON(http.StatusOK, dto.SuccessMessage{Message:"User deleted successfully"})
 }

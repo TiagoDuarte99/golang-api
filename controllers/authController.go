@@ -22,7 +22,7 @@ import (
 // @Failure 401 {object} helper.ErrorResponse "Unauthorized"
 // @Failure 404 {object} helper.ErrorResponse "Not Found"
 // @Failure 409 {object} helper.ErrorResponse "Conflit"
-// @Router /users [post]
+// @Router /signup [post]
 func Signup(ctx *gin.Context) {
 	var user dto.SignupRequest
 
@@ -42,7 +42,7 @@ func Signup(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, dto.SuccessMessage{Message: "User registered successfully"})
+ ctx.JSON(http.StatusOK, dto.SuccessMessage{Message: "User registered successfully"})
 }
 
 // @Summary User Login
@@ -75,9 +75,9 @@ func Login(ctx *gin.Context) {
 	}
 
 	response := dto.LoginResponse{
-		User:         user,         // Supondo que você tenha uma variável user com os dados do usuário
-		Token:        token,        // Token gerado
-		RefreshToken: refreshToken, // Token de refresh gerado
+		User:         *user,         
+		Token:        token,        
+		RefreshToken: refreshToken, 
 	}
 	ctx.JSON(http.StatusOK, response)
 }

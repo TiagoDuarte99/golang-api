@@ -46,28 +46,36 @@ func Signup(req *dto.SignupRequest) error {
 	return nil
 }
 
-func Login(email, password string) (models.User, string, string, error) {
+func Login(email, password string) (*dto.UserResponse, string, string, error) {
 	var user models.User
 
 	user, err := repositories.GetUserByEmailForLogin(email)
 	if err != nil {
-		return user, "", "", err
+		return nil, "", "", err
 	}
 
 	passwordIsValid, err := helper.VerifyPassword(password, user.Password)
 	if !passwordIsValid {
-		return user, "", "", err
+		return nil, "", "", err
 	}
 
 	token, refreshToken, _ := helper.GenerateAllTokens(user.Name, user.Email, user.UserType, user.ID)
 
 	err = helper.UpdateAllTokens(token, refreshToken, user.ID)
 	if err != nil {
-		return user, "", "", err
+		return nil, "", "", err
+	}
+/* 
+	user.Token = &token
+	user.RefreshToken = &refreshToken */
+
+	userResponse := &dto.UserResponse{
+		ID:           user.ID,
+		Name:         user.Name,
+		Email:        user.Email,
+		UserType:     user.UserType,
+		CreatedAt:    user.CreatedAt,
 	}
 
-	user.Token = &token
-	user.RefreshToken = &refreshToken
-
-	return user, token, refreshToken, nil
+	return userResponse, token, refreshToken, nil
 }
